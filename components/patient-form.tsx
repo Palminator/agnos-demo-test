@@ -1,9 +1,10 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useMemo } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { isValidPhone } from "@/lib/utils";
 import InputText from "@/components/ui/input-text";
+import Dropdown from "@/components/ui/dropdown";
 
 type Props = {
   patientId?: string;
@@ -368,16 +369,20 @@ export default function PatientForm({ patientId }: Props) {
                 <label className="block text-sm mb-1">
                   Gender <span className="text-orange-600">*</span>
                 </label>
-                <select
-                  value={form.gender}
-                  onChange={(e) => handleChange("gender", e.target.value)}
-                  className="w-full rounded border px-3 py-2"
-                >
-                  <option value="">Select gender</option>
-                  <option value="female">Female</option>
-                  <option value="male">Male</option>
-                  <option value="other">Other</option>
-                </select>
+                <Dropdown
+                  items={useMemo(() => [
+                    { id: "female", label: "Female" },
+                    { id: "male", label: "Male" },
+                    { id: "other", label: "Other" },
+                  ], [])}
+                  value={
+                    form.gender
+                      ? { id: form.gender, label: form.gender[0].toUpperCase() + form.gender.slice(1) }
+                      : undefined
+                  }
+                  placeholder="Select gender"
+                  onSelect={(it) => handleChange("gender", String(it.id))}
+                />
                 {errors.gender && (
                   <div className="text-xs text-red-600 mt-1">
                     {errors.gender}
