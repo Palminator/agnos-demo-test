@@ -11,7 +11,7 @@ export default function StaffPage() {
             Staff — Live Patient Data
           </h1>
           <p className="text-sm text-muted-foreground">
-            หน้าจอเจ้าหน้าที่ จะแสดงข้อมูลที่ผู้ใช้กรอกแบบเรียลไทม์
+            Real-time user data display for staff.
           </p>
         </div>
 

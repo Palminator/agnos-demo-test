@@ -38,22 +38,15 @@ export default function StaffViewer() {
 
       channelRef.current
         .on("broadcast", { event: "form_update" }, (msg: any) => {
-          console.log("[staff-viewer] received form_update:", msg);
           const payload = msg?.payload ?? msg;
           const id = payload?.patientId ?? payload?.id;
           const data = payload?.data ?? (payload?.firstName ? payload : null);
           if (id && data) {
             setPatients((s) => ({ ...s, [id]: { ...(s[id] ?? {}), ...data } }));
             setUpdatedAt(new Date().toLocaleTimeString());
-          } else {
-            console.warn(
-              "[staff-viewer] form_update missing patientId or data",
-              payload
-            );
           }
         })
         .on("broadcast", { event: "status_update" }, (msg: any) => {
-          console.log("[staff-viewer] received status_update:", msg);
           const payload = msg?.payload ?? msg;
           const id = payload?.patientId ?? payload?.id;
           const status = payload?.status;
@@ -67,24 +60,15 @@ export default function StaffViewer() {
               },
             }));
             setUpdatedAt(new Date().toLocaleTimeString());
-          } else {
-            console.warn(
-              "[staff-viewer] status_update missing patientId or status",
-              payload
-            );
           }
         })
         .subscribe();
-    } catch (e) {
-      // ignore
-    }
+    } catch (e) {}
 
     return () => {
       try {
         channelRef.current?.unsubscribe();
-      } catch {
-        // noop
-      }
+      } catch {}
     };
   }, []);
 
@@ -93,9 +77,10 @@ export default function StaffViewer() {
       <div className="flex flex-col space-y-6">
         {Object.keys(patients).length === 0 && (
           <div className="text-sm border sm:border-0 rounded-xl sm:rounded-none p-2 py-5 sm:p-0 text-muted-foreground">
-            ยังไม่มีข้อมูลผู้ป่วยเข้ามา
+            No patient data yet
           </div>
         )}
+
 
         {Object.entries(patients).map(([id, pdata], index) => (
           <div
@@ -104,22 +89,22 @@ export default function StaffViewer() {
           >
             <div className="flex sm:flex-row sm:items-center justify-between gap-2">
               <div className="text-xs text-muted-foreground">
-                คนไข้ {index + 1}
+                Patient {index + 1}
               </div>
               <div className="flex items-center gap-2">
                 {pdata.status === "typing" && (
                   <span className="text-[11px] px-2 py-0.5 bg-yellow-100 text-yellow-800 rounded">
-                    กำลังพิมพ์…
+                    Typing…
                   </span>
                 )}
                 {pdata.status === "submitted" && (
                   <span className="text-[11px] px-2 py-0.5 bg-emerald-100 text-emerald-800 rounded">
-                    ส่งแล้ว
+                    Submitted
                   </span>
                 )}
                 {pdata.status === "idle" && (
                   <span className="text-[11px] px-2 py-0.5 bg-slate-100 text-slate-800 rounded">
-                    ไม่ตอบสนอง
+                    Idle
                   </span>
                 )}
                 {!pdata.status && (
@@ -135,7 +120,7 @@ export default function StaffViewer() {
               <section className="p-4 border rounded-lg transition-all duration-300 ease-in-out">
                 <div className="flex items-center gap-3 mb-2">
                   <div>
-                    <div className="text-sm font-medium">ข้อมูลส่วนตัว</div>
+                    <div className="text-sm font-medium">Personal Information</div>
                     <div className="text-xs text-muted-foreground">
                       Basic personal details
                     </div>
@@ -143,25 +128,25 @@ export default function StaffViewer() {
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
                   <div>
-                    <div className="text-xs text-muted-foreground">ชื่อ</div>
+                    <div className="text-xs text-muted-foreground">First Name</div>
                     <div className="font-medium">{pdata.firstName || "—"}</div>
                   </div>
                   <div>
                     <div className="text-xs text-muted-foreground">
-                      ชื่อกลาง
+                      Middle Name
                     </div>
                     <div className="font-medium">{pdata.middleName || "—"}</div>
                   </div>
                   <div>
-                    <div className="text-xs text-muted-foreground">นามสกุล</div>
+                    <div className="text-xs text-muted-foreground">Last Name</div>
                     <div className="font-medium">{pdata.lastName || "—"}</div>
                   </div>
                   <div>
-                    <div className="text-xs text-muted-foreground">วันเกิด</div>
+                    <div className="text-xs text-muted-foreground">Date of Birth</div>
                     <div className="font-medium">{pdata.dob || "—"}</div>
                   </div>
                   <div>
-                    <div className="text-xs text-muted-foreground">เพศ</div>
+                    <div className="text-xs text-muted-foreground">Gender</div>
                     <div className="font-medium">{pdata.gender || "—"}</div>
                   </div>
                 </div>
@@ -171,7 +156,7 @@ export default function StaffViewer() {
               <section className="p-4 border rounded-lg transition-all duration-300 ease-in-out">
                 <div className="flex items-center gap-3 mb-2">
                   <div>
-                    <div className="text-sm font-medium">ข้อมูลติดต่อ</div>
+                    <div className="text-sm font-medium">Contact Information</div>
                     <div className="text-xs text-muted-foreground">
                       Phone, email and address
                     </div>
@@ -179,7 +164,7 @@ export default function StaffViewer() {
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
                   <div>
-                    <div className="text-xs text-muted-foreground">เบอร์</div>
+                    <div className="text-xs text-muted-foreground">Phone</div>
                     <div className="font-medium">{pdata.phone || "—"}</div>
                   </div>
                   <div>
@@ -188,7 +173,7 @@ export default function StaffViewer() {
                   </div>
                   <div>
                     <div className="text-xs text-muted-foreground">
-                      ภาษาโปรด
+                      Preferred Language
                     </div>
                     <div className="font-medium">
                       {pdata.preferredLanguage || "—"}
@@ -196,7 +181,7 @@ export default function StaffViewer() {
                   </div>
                 </div>
                 <div className="mt-2">
-                  <div className="text-xs text-muted-foreground">สัญชาติ</div>
+                  <div className="text-xs text-muted-foreground">Nationality</div>
                   <div className="font-medium">{pdata.nationality || "—"}</div>
                 </div>
               </section>
@@ -205,7 +190,7 @@ export default function StaffViewer() {
               <section className="p-4 border rounded-lg transition-all duration-300 ease-in-out">
                 <div className="flex items-center gap-3 mb-2">
                   <div>
-                    <div className="text-sm font-medium">ที่อยู่</div>
+                    <div className="text-sm font-medium">Address</div>
                     <div className="text-xs text-muted-foreground">
                       Street address and area
                     </div>
@@ -218,7 +203,7 @@ export default function StaffViewer() {
               <section className="p-4 border rounded-lg transition-all duration-300 ease-in-out">
                 <div className="flex items-center gap-3 mb-2">
                   <div>
-                    <div className="text-sm font-medium">ข้อมูลเพิ่มเติม</div>
+                    <div className="text-sm font-medium">Additional Information</div>
                     <div className="text-xs text-muted-foreground">
                       Optional details
                     </div>
@@ -226,7 +211,7 @@ export default function StaffViewer() {
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                   <div>
-                    <div className="text-xs text-muted-foreground">ศาสนา</div>
+                    <div className="text-xs text-muted-foreground">Religion</div>
                     <div className="font-medium">{pdata.religion || "—"}</div>
                   </div>
                 </div>
@@ -236,7 +221,7 @@ export default function StaffViewer() {
               <section className="p-4 border rounded-lg">
                 <div className="flex items-center gap-3 mb-2">
                   <div>
-                    <div className="text-sm font-medium">ผู้ติดต่อฉุกเฉิน</div>
+                    <div className="text-sm font-medium">Emergency Contact</div>
                     <div className="text-xs text-muted-foreground">
                       Optional
                     </div>

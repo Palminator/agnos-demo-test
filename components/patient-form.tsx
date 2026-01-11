@@ -5,6 +5,8 @@ import { createClient } from "@/lib/supabase/client";
 import { isValidPhone } from "@/lib/utils";
 import InputText from "@/components/ui/input-text";
 import Dropdown from "@/components/ui/dropdown";
+import { DatePickerClient } from "@/components/ui/date-picker-client";
+import ButtonCustom from "@/components/ui/button-custom";
 
 type Props = {
   patientId?: string;
@@ -169,13 +171,11 @@ export default function PatientForm({ patientId }: Props) {
         event: "form_update",
         payload,
       });
-      // send typing status and schedule idle
       channelRef.current?.send({
         type: "broadcast",
         event: "status_update",
         payload: { patientId: currentId, status: "typing" },
       });
-      console.log("[patient-form] sent update", payload);
       if (typingTimer.current) window.clearTimeout(typingTimer.current);
       typingTimer.current = window.setTimeout(() => {
         try {
@@ -184,30 +184,25 @@ export default function PatientForm({ patientId }: Props) {
             event: "status_update",
             payload: { patientId: currentId, status: "idle" },
           });
-          console.log("[patient-form] sent idle", currentId);
-        } catch (e) {
-          // ignore
-        }
+        } catch (e) {}
       }, idleTimeout);
-    } catch (e) {
-      // ignore
-    }
+    } catch (e) {}
   };
 
   const validateForm = () => {
     const nextErrors: Record<string, string> = {};
-    if (!form.firstName.trim()) nextErrors.firstName = "ต้องระบุชื่อ";
-    if (!form.lastName.trim()) nextErrors.lastName = "ต้องระบุนามสกุล";
-    if (!form.dob) nextErrors.dob = "ต้องระบุวันเกิด";
-    if (!form.gender) nextErrors.gender = "ต้องเลือกเพศ";
-    if (!form.phone.trim()) nextErrors.phone = "ต้องระบุเบอร์โทร";
+    if (!form.firstName.trim()) nextErrors.firstName = "First name is required";
+    if (!form.lastName.trim()) nextErrors.lastName = "Last name is required";
+    if (!form.dob) nextErrors.dob = "Date of birth is required";
+    if (!form.gender) nextErrors.gender = "Gender is required";
+    if (!form.phone.trim()) nextErrors.phone = "Phone number is required";
     else {
-      if (!isValidPhone(form.phone)) nextErrors.phone = "รูปแบบเบอร์ไม่ถูกต้อง";
+      if (!isValidPhone(form.phone)) nextErrors.phone = "Invalid phone number format";
     }
-    if (!form.email.trim()) nextErrors.email = "ต้องระบุอีเมล";
+    if (!form.email.trim()) nextErrors.email = "Email is required";
     else {
       const emailRe = /^\S+@\S+\.\S+$/;
-      if (!emailRe.test(form.email)) nextErrors.email = "อีเมลไม่ถูกต้อง";
+      if (!emailRe.test(form.email)) nextErrors.email = "Invalid email format";
     }
 
     setErrors(nextErrors);
@@ -230,7 +225,6 @@ export default function PatientForm({ patientId }: Props) {
         event: "status_update",
         payload: { patientId: currentId, status: "submitted" },
       });
-      console.log("[patient-form] submitted", payload);
       if (typingTimer.current) window.clearTimeout(typingTimer.current);
 
       // reset form state and generate new id for next patient
@@ -301,11 +295,7 @@ export default function PatientForm({ patientId }: Props) {
                   error={!!errors.firstName}
                   errorText={errors.firstName}
                 />
-                {errors.firstName && (
-                  <div className="text-xs text-red-600 mt-1">
-                    {errors.firstName}
-                  </div>
-                )}
+                
               </div>
 
               <div>
@@ -328,11 +318,7 @@ export default function PatientForm({ patientId }: Props) {
                   error={!!errors.lastName}
                   errorText={errors.lastName}
                 />
-                {errors.lastName && (
-                  <div className="text-xs text-red-600 mt-1">
-                    {errors.lastName}
-                  </div>
-                )}
+                
               </div>
             </div>
 
@@ -342,23 +328,11 @@ export default function PatientForm({ patientId }: Props) {
                   Date of Birth <span className="text-orange-600">*</span>
                 </label>
                 <div className="relative">
-                  <InputText
-                    type="date"
-                    placeholder="YYYY-MM-DD"
-                    bindValue={form.dob}
-                    onChange={(e) => handleChange("dob", e.target.value)}
-                    className="pr-10"
+                  <DatePickerClient
+                    date={form.dob || undefined}
+                    onChange={(v) => handleChange("dob", v)}
+                    disabled={false}
                   />
-                  <div className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400">
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      className="h-5 w-5"
-                      viewBox="0 0 20 20"
-                      fill="currentColor"
-                    >
-                      <path d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v9a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zM4 8h12v7H4V8z" />
-                    </svg>
-                  </div>
                 </div>
                 {errors.dob && (
                   <div className="text-xs text-red-600 mt-1">{errors.dob}</div>
@@ -423,11 +397,7 @@ export default function PatientForm({ patientId }: Props) {
                   error={!!errors.phone}
                   errorText={errors.phone}
                 />
-                {errors.phone && (
-                  <div className="text-xs text-red-600 mt-1">
-                    {errors.phone}
-                  </div>
-                )}
+               
               </div>
 
               <div>
@@ -441,11 +411,7 @@ export default function PatientForm({ patientId }: Props) {
                   error={!!errors.email}
                   errorText={errors.email}
                 />
-                {errors.email && (
-                  <div className="text-xs text-red-600 mt-1">
-                    {errors.email}
-                  </div>
-                )}
+               
               </div>
 
               <div />
@@ -734,12 +700,13 @@ export default function PatientForm({ patientId }: Props) {
           </section>
 
           <div className="flex items-center justify-center">
-            <button
+            <ButtonCustom
               type="submit"
-              className="inline-flex items-center gap-2 bg-gradient-to-r from-indigo-600 to-blue-500 text-white px-5 py-2 rounded-full shadow"
+              variant="primary"
+              size="large"
             >
               Submit
-            </button>
+            </ButtonCustom>
           </div>
         </form>
       </div>
