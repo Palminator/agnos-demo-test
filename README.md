@@ -1,5 +1,8 @@
 # Agnos Demo Test (Frontend)
 
+Path '/client' for test input form
+Path '/staff' for test monitor data real-time
+
 Quick setup and notes for the frontend portion of the project.
 
 ## Requirements
