@@ -18,6 +18,7 @@ type Props<T extends { value?: unknown } = { value?: string }> = {
   slotLabelRight?: React.ReactNode;
   optional?: boolean;
   height?: number;
+  error?: boolean;
 };
 
 const styles = {
@@ -52,6 +53,7 @@ export const Dropdown = <T extends { value?: unknown } = { value?: string }>(
     information,
     slotLabelRight,
     height,
+    error = false,
   } = props;
 
   const ref = useRef<HTMLDivElement | null>(null);
@@ -110,8 +112,8 @@ export const Dropdown = <T extends { value?: unknown } = { value?: string }>(
       )}
 
       <div className={styles.wrapper} ref={ref}>
-        <div className={styles.selected} onClick={toggleDropdown} role="button" tabIndex={0}>
-          <div className="flex-1 truncate">{selected?.label ?? placeholder}</div>
+        <div className={`${styles.selected} ${error ? 'border-red-500' : ''}`} onClick={toggleDropdown} role="button" tabIndex={0}>
+          <div className={`flex-1 truncate ${!selected ? 'text-slate-400' : ''}`}>{selected?.label ?? placeholder}</div>
           <div className={styles.icon} aria-hidden>
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
               <polyline points="6 9 12 15 18 9" />

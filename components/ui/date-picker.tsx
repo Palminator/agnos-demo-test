@@ -8,9 +8,10 @@ type PropsType = {
   date?: string;
   onChange?: (date: string) => void;
   disabled?: boolean;
+  error?: boolean;
 };
 
-export const DatePicker = ({ date = undefined, onChange, disabled = false }: PropsType) => {
+export const DatePicker = ({ date = undefined, onChange, disabled = false, error = false }: PropsType) => {
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
@@ -21,15 +22,8 @@ export const DatePicker = ({ date = undefined, onChange, disabled = false }: Pro
     if (date) {
       return new Date(date);
     }
-    // For SSR and fallback, use a safe date
-    return new Date(0); // Unix epoch
+    return null;
   }, [date]);
-
-  // On client mount, show today's date if no date provided
-  const finalDateObj = useMemo(() => {
-    if (!mounted) return dateObj;
-    return !date ? new Date() : dateObj;
-  }, [mounted, date, dateObj]);
 
   const handleChange = (d: Date | null) => {
     if (d) {
@@ -45,22 +39,22 @@ export const DatePicker = ({ date = undefined, onChange, disabled = false }: Pro
     }
   };
 
-  // if (!mounted) {
-  //   // Render a simple fallback during SSR
-  //   return (
-  //     <div className="relative h-[42px] w-full">
-  //       <div className="w-full h-[42px] bg-white border border-gray-200 rounded-md px-3 py-2 flex items-center justify-between text-gray-400 text-sm">
-  //         Select date
-  //       </div>
-  //     </div>
-  //   );
-  // }
+  if (!mounted) {
+    // Render a simple fallback during SSR
+    return (
+      <div className="relative h-[42px] w-full">
+        <div className="w-full h-[42px] bg-white border border-gray-200 rounded-md px-3 py-2 flex items-center justify-between text-gray-400 text-sm">
+          Select date
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="relative w-full">
-      <div className="react-datepicker-wrapper w-full h-[42px] rounded-md border border-gray-200 ring-1 ring-gray-200 overflow-hidden cursor-pointer hover:ring-2 hover:ring-gray-300 flex items-center">
+      <div className={`react-datepicker-wrapper w-full h-[42px] rounded-md overflow-hidden cursor-pointer flex items-center ${error ? 'border border-red-500 ring-1 ring-red-500 hover:ring-2 hover:ring-red-600' : 'border border-gray-200 ring-1 ring-gray-200 hover:ring-2 hover:ring-gray-300'}`}>
         <ReactDatePicker
-          selected={finalDateObj}
+          selected={dateObj}
           onChange={handleChange}
           disabled={disabled}
           dateFormat="dd MMM yyyy"

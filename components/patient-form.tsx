@@ -332,6 +332,7 @@ export default function PatientForm({ patientId }: Props) {
                     date={form.dob || undefined}
                     onChange={(v) => handleChange("dob", v)}
                     disabled={false}
+                    error={!!errors.dob}
                   />
                 </div>
                 {errors.dob && (
@@ -356,6 +357,7 @@ export default function PatientForm({ patientId }: Props) {
                   }
                   placeholder="Select gender"
                   onSelect={(it) => handleChange("gender", String(it.id))}
+                  error={!!errors.gender}
                 />
                 {errors.gender && (
                   <div className="text-xs text-red-600 mt-1">

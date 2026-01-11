@@ -18,6 +18,7 @@ type PropsType = {
   date?: string;
   onChange?: (date: string) => void;
   disabled?: boolean;
+  error?: boolean;
 };
 
 export const DatePickerClient = (props: PropsType) => {
