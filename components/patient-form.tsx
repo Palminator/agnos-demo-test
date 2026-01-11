@@ -2,6 +2,8 @@
 
 import { useEffect, useRef, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
+import { isValidPhone } from "@/lib/utils";
+import InputText from "@/components/ui/input-text";
 
 type Props = {
   patientId?: string;
@@ -191,33 +193,6 @@ export default function PatientForm({ patientId }: Props) {
     }
   };
 
-  const handleProvinceChange = (pName: string) => {
-    const province = areas.find((p) => p.name === pName);
-    const districts = province?.districts ?? [];
-    setDistrictOptions(districts);
-    setSubdistrictOptions([]);
-    handleChange("province", pName);
-    handleChange("district", "");
-    handleChange("subdistrict", "");
-    handleChange("postalCode", "");
-  };
-
-  const handleDistrictChange = (dName: string) => {
-    const district = districtOptions.find((d) => d.name === dName);
-    const subs = district?.subdistricts ?? [];
-    setSubdistrictOptions(subs);
-    handleChange("district", dName);
-    handleChange("subdistrict", "");
-    handleChange("postalCode", "");
-  };
-
-  const handleSubdistrictChange = (sName: string) => {
-    const sub = subdistrictOptions.find((s) => s.name === sName);
-    const pcode = sub?.postal_code ?? "";
-    handleChange("subdistrict", sName);
-    handleChange("postalCode", pcode);
-  };
-
   const validateForm = () => {
     const nextErrors: Record<string, string> = {};
     if (!form.firstName.trim()) nextErrors.firstName = "ต้องระบุชื่อ";
@@ -226,8 +201,7 @@ export default function PatientForm({ patientId }: Props) {
     if (!form.gender) nextErrors.gender = "ต้องเลือกเพศ";
     if (!form.phone.trim()) nextErrors.phone = "ต้องระบุเบอร์โทร";
     else {
-      const phoneRe = /^\+?[0-9\s\-()]{7,20}$/;
-      if (!phoneRe.test(form.phone)) nextErrors.phone = "รูปแบบเบอร์ไม่ถูกต้อง";
+      if (!isValidPhone(form.phone)) nextErrors.phone = "รูปแบบเบอร์ไม่ถูกต้อง";
     }
     if (!form.email.trim()) nextErrors.email = "ต้องระบุอีเมล";
     else {
@@ -319,11 +293,12 @@ export default function PatientForm({ patientId }: Props) {
                 <label className="block text-sm mb-1">
                   First Name <span className="text-orange-600">*</span>
                 </label>
-                <input
+                <InputText
                   placeholder="First name"
-                  value={form.firstName}
+                  bindValue={form.firstName}
                   onChange={(e) => handleChange("firstName", e.target.value)}
-                  className="w-full rounded border px-3 py-2"
+                  error={!!errors.firstName}
+                  errorText={errors.firstName}
                 />
                 {errors.firstName && (
                   <div className="text-xs text-red-600 mt-1">
@@ -334,11 +309,10 @@ export default function PatientForm({ patientId }: Props) {
 
               <div>
                 <label className="block text-sm mb-1">Middle Name</label>
-                <input
+                <InputText
                   placeholder="Middle name (optional)"
-                  value={form.middleName}
+                  bindValue={form.middleName}
                   onChange={(e) => handleChange("middleName", e.target.value)}
-                  className="w-full rounded border px-3 py-2"
                 />
               </div>
 
@@ -346,11 +320,12 @@ export default function PatientForm({ patientId }: Props) {
                 <label className="block text-sm mb-1">
                   Last Name <span className="text-orange-600">*</span>
                 </label>
-                <input
+                <InputText
                   placeholder="Last name"
-                  value={form.lastName}
+                  bindValue={form.lastName}
                   onChange={(e) => handleChange("lastName", e.target.value)}
-                  className="w-full rounded border px-3 py-2"
+                  error={!!errors.lastName}
+                  errorText={errors.lastName}
                 />
                 {errors.lastName && (
                   <div className="text-xs text-red-600 mt-1">
@@ -366,12 +341,12 @@ export default function PatientForm({ patientId }: Props) {
                   Date of Birth <span className="text-orange-600">*</span>
                 </label>
                 <div className="relative">
-                  <input
+                  <InputText
                     type="date"
                     placeholder="YYYY-MM-DD"
-                    value={form.dob}
+                    bindValue={form.dob}
                     onChange={(e) => handleChange("dob", e.target.value)}
-                    className="w-full rounded border px-3 py-2 pr-10"
+                    className="pr-10"
                   />
                   <div className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400">
                     <svg
@@ -433,11 +408,15 @@ export default function PatientForm({ patientId }: Props) {
                 <label className="block text-sm mb-1">
                   Phone Number <span className="text-orange-600">*</span>
                 </label>
-                <input
-                  placeholder="e.g. +66 812345678"
-                  value={form.phone}
-                  onChange={(e) => handleChange("phone", e.target.value)}
-                  className="w-full rounded border px-3 py-2"
+                <InputText
+                  placeholder="e.g. 0812345678"
+                  bindValue={form.phone}
+                  onChange={(e) => {
+                    const digits = e.target.value.replace(/\D/g, "");
+                    handleChange("phone", digits);
+                  }}
+                  error={!!errors.phone}
+                  errorText={errors.phone}
                 />
                 {errors.phone && (
                   <div className="text-xs text-red-600 mt-1">
@@ -450,11 +429,12 @@ export default function PatientForm({ patientId }: Props) {
                 <label className="block text-sm mb-1">
                   Email Address <span className="text-orange-600">*</span>
                 </label>
-                <input
+                <InputText
                   placeholder="name@example.com"
-                  value={form.email}
+                  bindValue={form.email}
                   onChange={(e) => handleChange("email", e.target.value)}
-                  className="w-full rounded border px-3 py-2"
+                  error={!!errors.email}
+                  errorText={errors.email}
                 />
                 {errors.email && (
                   <div className="text-xs text-red-600 mt-1">
@@ -479,9 +459,9 @@ export default function PatientForm({ patientId }: Props) {
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-3 mt-3">
               <div className="relative">
                 <label className="block text-sm mb-1">Province</label>
-                <input
+                <InputText
                   placeholder="Province"
-                  value={form.province}
+                  bindValue={form.province}
                   onChange={(e) => {
                     const v = e.target.value;
                     handleChange("province", v);
@@ -517,7 +497,6 @@ export default function PatientForm({ patientId }: Props) {
                   onBlur={() =>
                     setTimeout(() => setShowProvinceSuggestions(false), 150)
                   }
-                  className="w-full rounded border px-3 py-2"
                 />
                 {showProvinceSuggestions && provinceSuggestions.length > 0 && (
                   <ul className="absolute left-0 right-0 mt-1 z-50 bg-white border rounded shadow max-h-48 overflow-auto">
@@ -538,9 +517,9 @@ export default function PatientForm({ patientId }: Props) {
 
               <div className="relative">
                 <label className="block text-sm mb-1">District</label>
-                <input
+                <InputText
                   placeholder="District"
-                  value={form.district}
+                  bindValue={form.district}
                   onChange={(e) => {
                     const v = e.target.value;
                     handleChange("district", v);
@@ -591,7 +570,6 @@ export default function PatientForm({ patientId }: Props) {
                   onBlur={() =>
                     setTimeout(() => setShowDistrictSuggestions(false), 150)
                   }
-                  className="w-full rounded border px-3 py-2"
                 />
                 {showDistrictSuggestions && districtSuggestions.length > 0 && (
                   <ul className="absolute left-0 right-0 mt-1 z-50 bg-white border rounded shadow max-h-48 overflow-auto">
@@ -612,9 +590,9 @@ export default function PatientForm({ patientId }: Props) {
 
               <div className="relative">
                 <label className="block text-sm mb-1">Subdistrict</label>
-                <input
+                <InputText
                   placeholder="Subdistrict"
-                  value={form.subdistrict}
+                  bindValue={form.subdistrict}
                   onChange={(e) => {
                     const v = e.target.value;
                     handleChange("subdistrict", v);
@@ -646,7 +624,6 @@ export default function PatientForm({ patientId }: Props) {
                     }
                   }}
                   onBlur={() => setTimeout(() => setShowSubdistrictSuggestions(false), 150)}
-                  className="w-full rounded border px-3 py-2"
                 />
                 {showSubdistrictSuggestions && subdistrictSuggestions.length > 0 && (
                   <ul className="absolute left-0 right-0 mt-1 z-50 bg-white border rounded shadow max-h-48 overflow-auto">
@@ -660,11 +637,10 @@ export default function PatientForm({ patientId }: Props) {
               </div>
               <div className="relative">
                 <label className="block text-sm mb-1">Postcode</label>
-                <input
+                <InputText
                   placeholder="Postal code"
-                  value={form.postalCode}
+                  bindValue={form.postalCode}
                   onChange={(e) => handleChange("postalCode", e.target.value)}
-                  className="w-full rounded border px-3 py-2"
                 />
               </div>
             </div>
@@ -689,31 +665,28 @@ export default function PatientForm({ patientId }: Props) {
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
               <div>
                 <label className="block text-sm mb-1">Preferred Language</label>
-                <input
+                <InputText
                   placeholder="e.g. Thai, English"
-                  value={form.preferredLanguage}
+                  bindValue={form.preferredLanguage}
                   onChange={(e) =>
                     handleChange("preferredLanguage", e.target.value)
                   }
-                  className="w-full rounded border px-3 py-2"
                 />
               </div>
               <div>
                 <label className="block text-sm mb-1">Nationality</label>
-                <input
+                <InputText
                   placeholder="Nationality"
-                  value={form.nationality}
+                  bindValue={form.nationality}
                   onChange={(e) => handleChange("nationality", e.target.value)}
-                  className="w-full rounded border px-3 py-2"
                 />
               </div>
               <div>
                 <label className="block text-sm mb-1">Religion</label>
-                <input
+                <InputText
                   placeholder="Religion"
-                  value={form.religion}
+                  bindValue={form.religion}
                   onChange={(e) => handleChange("religion", e.target.value)}
-                  className="w-full rounded border px-3 py-2"
                 />
               </div>
             </div>
@@ -734,24 +707,22 @@ export default function PatientForm({ patientId }: Props) {
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
                 <label className="block text-sm mb-1">Full Name</label>
-                <input
+                <InputText
                   placeholder="Emergency contact full name"
-                  value={form.emergencyName}
+                  bindValue={form.emergencyName}
                   onChange={(e) =>
                     handleChange("emergencyName", e.target.value)
                   }
-                  className="w-full rounded border px-3 py-2"
                 />
               </div>
               <div>
                 <label className="block text-sm mb-1">Relationship</label>
-                <input
+                <InputText
                   placeholder="Relationship"
-                  value={form.emergencyRelation}
+                  bindValue={form.emergencyRelation}
                   onChange={(e) =>
                     handleChange("emergencyRelation", e.target.value)
                   }
-                  className="w-full rounded border px-3 py-2"
                 />
               </div>
             </div>
