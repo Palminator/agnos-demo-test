@@ -1,0 +1,38 @@
+{
+  "provinces": [
+    {
+      "name": "กรุงเทพมหานคร",
+      "districts": [
+        {
+          "name": "พระนคร",
+          "subdistricts": [
+            { "name": "บางลำพู", "postal_code": "10200" },
+            { "name": "สำราญราษฎร์", "postal_code": "10200" }
+          ]
+        },
+        {
+          "name": "ดุสิต",
+          "subdistricts": [
+            { "name": "ดุสิต", "postal_code": "10300" }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "เชียงใหม่",
+      "districts": [
+        {
+          "name": "เมืองเชียงใหม่",
+          "subdistricts": [
+            { "name": "ศรีภูมิ", "postal_code": "50200" },
+            { "name": "ห้วยแก้ว", "postal_code": "50200" }
+          ]
+        },
+        {
+          "name": "สารภี",
+          "subdistricts": [{ "name": "สารภี", "postal_code": "50140" }]
+        }
+      ]
+    }
+  ]
+}
